@@ -26,18 +26,11 @@ public:
         raw_ptr_ = raw_ptr;
     }
 
-    /*
     // Запрещаем копирование
     ArrayPtr(const ArrayPtr&) = delete;
 
     // Запрещаем присваивание
     ArrayPtr& operator=(const ArrayPtr&) = delete;
-    */
-    // Конструктор копирования
-    ArrayPtr(const ArrayPtr&) = default;
-
-    // Копирующий оператор присваивания
-    ArrayPtr& operator=(const ArrayPtr&) = default;
 
     // Конструктор перемещения
     ArrayPtr(ArrayPtr&& other) {
@@ -46,6 +39,8 @@ public:
 
     // Перемещающий оператор присваивания
     ArrayPtr& operator=(ArrayPtr&& other) {
+        if (raw_ptr_) { delete[] raw_ptr_; }
+
         raw_ptr_ = std::exchange(other.raw_ptr_, nullptr);
         return *this;
     };
@@ -84,15 +79,7 @@ public:
 
     // Обменивается значениям указателя на массив с объектом other
     void swap(ArrayPtr& other) noexcept {
-        /*
-        ArrayPtr tmp;
-
-        tmp.raw_ptr_ = other.raw_ptr_;
-        other.raw_ptr_ = raw_ptr_;
-        raw_ptr_ = tmp.raw_ptr_;
-
-        tmp.raw_ptr_ = nullptr;
-        */
+        
         std::swap(raw_ptr_, other.raw_ptr_);
 
     }
