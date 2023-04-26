@@ -161,6 +161,9 @@ public:
     }
 
     Iterator Insert(ConstIterator pos, Type&& value) {
+        // Проверка диапазона
+        assert(pos >= begin() && pos <= end());
+        
         // вставка в конец
         if (pos == cend()) {
             PushBack(std::move(value));
