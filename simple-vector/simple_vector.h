@@ -67,7 +67,8 @@ public:
 
     SimpleVector& operator=(const SimpleVector& rhs) {
 
-        if (&items_ == &(rhs.items_)) { return *this; }
+        const SimpleVector* rhs_prt = &rhs;
+        if (this == rhs_prt) { return *this; }
 
         SimpleVector<Type> tmp{ rhs };
 
@@ -79,7 +80,7 @@ public:
     // Конструктор перемещения
     SimpleVector(SimpleVector&& other) {
 
-        items_ = std::exchange(other.items_, {});
+        items_ = std::move(other.items_);
         size_ = std::exchange(other.size_, 0);
         capacity_ = std::exchange(other.capacity_, 0);
 
@@ -88,11 +89,12 @@ public:
     // Оператор перемещения
     SimpleVector& operator=(SimpleVector&& rhs) {
 
-        if (&items_ == &(rhs.items_)) { return *this; }
+        const SimpleVector* rhs_prt = &rhs;
+        if (this == rhs_prt) { return *this; }
 
-        SimpleVector<Type> tmp{ std::move(rhs) };
-
-        swap(tmp);
+        items_ = std::move(rhs.items_);
+        size_ = std::exchange(rhs.size_, 0);
+        capacity_ = std::exchange(rhs.capacity_, 0);
 
         return *this;
     }
@@ -128,7 +130,8 @@ public:
 
     // "Удаляет" последний элемент вектора. Вектор не должен быть пустым
     void PopBack() noexcept {
-        if (!IsEmpty()) { --size_; }
+        assert(!IsEmpty());
+        --size_;
     }
 
     // Вставляет значение value в позицию pos.
@@ -136,6 +139,9 @@ public:
     // Если перед вставкой значения вектор был заполнен полностью,
     // вместимость вектора должна увеличиться вдвое, а для вектора вместимостью 0 стать равной 1
     Iterator Insert(ConstIterator pos, const Type& value) {
+        // Проверка диапазона
+        assert(pos >= cbegin() && pos <= cend());
+        
         // вставка в конец
         if (pos == cend()) {
             PushBack(value);
@@ -176,6 +182,8 @@ public:
 
     // Удаляет элемент вектора в указанной позиции
     Iterator Erase(ConstIterator pos) {
+        // Проверка диапазона
+        assert(pos >= begin() && pos < end());
 
         size_t curr_index = pos - begin();
 
@@ -205,11 +213,13 @@ public:
 
     // Возвращает ссылку на элемент с индексом index
     Type& operator[](size_t index) noexcept {
+        assert(index < size_);
         return items_[index];
     }
 
     // Возвращает константную ссылку на элемент с индексом index
     const Type& operator[](size_t index) const noexcept {
+        assert(index < size_);
         return items_[index];
     }
 
